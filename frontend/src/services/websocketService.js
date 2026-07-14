@@ -23,7 +23,7 @@ class WebSocketService {
 
     this.shouldReconnect = true;
 
-    this.socket = new WebSocket("ws://127.0.0.1:8000/ws/dashboard");
+    this.socket = new WebSocket("wss://ai-industrial-safety-system.onrender.com/ws/dashboard");
 
     this.socket.onopen = () => {
       console.log("✅ WebSocket Connected");
