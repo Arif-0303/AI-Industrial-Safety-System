@@ -17,7 +17,7 @@ function AIChat() {
 
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/chat/",
+        "https://ai-industrial-safety-system.onrender.com/chat/",
         {
           message,
         }

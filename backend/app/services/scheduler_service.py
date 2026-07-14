@@ -11,7 +11,7 @@ async def broadcast_sensor_data():
     try:
         async with httpx.AsyncClient() as client:
             await client.post(
-                "http://127.0.0.1:8000/sensors/broadcast"
+                "https://ai-industrial-safety-system.onrender.com/sensors/broadcast"
             )
     except Exception as e:
         print("Scheduler Error:", e)

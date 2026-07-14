@@ -104,3 +104,4 @@ def home():
         "health": "/health",
         "websocket": "/ws/dashboard",
     }
+    #https://ai-industrial-safety-system.onrender.com
