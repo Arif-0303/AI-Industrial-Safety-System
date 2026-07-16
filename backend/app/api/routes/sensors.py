@@ -147,34 +147,83 @@ def save_sensor_history(
 # Store Notifications
 # Only popup Danger & Critical alerts
 # ==========================================================
-
 async def store_notifications(
     db: Session,
     sector: Sector,
     ai_data,
 ):
+    """
+    Store ONLY high-priority notifications.
 
-    for alert in ai_data["alerts"]:
+    Types:
+    1. CCTV Insight
+    2. AI Safety Alert
+    """
 
-        severity = alert["type"].strip().lower()
+    risk_score = ai_data["risk_score"]
 
-        # Save every alert in database
+    # ======================================================
+    # AI SAFETY ALERT
+    # ======================================================
+
+    if risk_score >= 75:
+
+        title = "🤖 AI SAFETY ALERT"
+
+        message = (
+            f"Sector: {sector.name}\n"
+            f"Risk Score: {risk_score:.1f}\n\n"
+            f"{ai_data['recommendation']}"
+        )
+
         create_notification(
             db=db,
-            title=alert["type"],
-            message=alert["message"],
-            severity=alert["type"],
+            title=title,
+            message=message,
+            severity="Critical",
             sector=sector.name,
         )
 
-        # Popup only Danger and Critical alerts
-        if severity not in ["high","danger", "critical"]:
-            continue
-
         await manager.send_notification(
-            title=f"🚨 {alert['type']}",
-            message=f"{sector.name}: {alert['message']}",
+            title=title,
+            message=message,
         )
+
+    # ======================================================
+    # CCTV INSIGHT
+    # ======================================================
+
+    for alert in ai_data["alerts"]:
+
+        text = alert["message"].lower()
+
+        if (
+            "smoke" in text
+            or "dense smoke" in text
+            or "fire" in text
+            or "explosion" in text
+            or "gas leak" in text
+        ):
+
+            title = "🎥 CCTV INSIGHT"
+
+            message = (
+                f"Sector: {sector.name}\n\n"
+                f"{alert['message']}"
+            )
+
+            create_notification(
+                db=db,
+                title=title,
+                message=message,
+                severity="Critical",
+                sector=sector.name,
+            )
+
+            await manager.send_notification(
+                title=title,
+                message=message,
+            )
 
 
 # ==========================================================
