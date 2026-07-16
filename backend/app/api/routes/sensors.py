@@ -17,7 +17,10 @@ from app.ai.incident_prediction import predict_incident
 from app.websocket.connection_manager import manager
 
 # NEW
-from app.services.notification_service import create_notification
+from app.services.notification_service import (
+    upsert_notification,
+    delete_sector_notification,
+)
 
 router = APIRouter(
     prefix="/sensors",
@@ -139,26 +142,15 @@ def save_sensor_history(
     db.commit()
     db.refresh(history)
 
+# ==========================================================
+# Store Notifications
+# ==========================================================
 
-# ==========================================================
-# Store Notifications
-# ==========================================================
-# ==========================================================
-# Store Notifications
-# Only popup Danger & Critical alerts
-# ==========================================================
 async def store_notifications(
     db: Session,
     sector: Sector,
     ai_data,
 ):
-    """
-    Store ONLY high-priority notifications.
-
-    Types:
-    1. CCTV Insight
-    2. AI Safety Alert
-    """
 
     risk_score = ai_data["risk_score"]
 
@@ -167,64 +159,85 @@ async def store_notifications(
     # ======================================================
 
     if risk_score >= 75:
-#this is the end
-        title = "🤖 AI SAFETY ALERT"
 
-        message = (
-            f"Sector: {sector.name}\n"
-            f"Risk Score: {risk_score:.1f}\n\n"
-            f"{ai_data['recommendation']}"
-        )
-
-        create_notification(
+        upsert_notification(
             db=db,
-            title=title,
-            message=message,
+            title="🤖 AI SAFETY ALERT",
+            message=(
+                f"Sector: {sector.name}\n"
+                f"Risk Score: {risk_score:.1f}\n\n"
+                f"{ai_data['recommendation']}"
+            ),
             severity="Critical",
             sector=sector.name,
         )
 
-        await manager.send_notification(
-            title=title,
-            message=message,
+    elif risk_score >= 60:
+
+        upsert_notification(
+            db=db,
+            title="🤖 AI SAFETY ALERT",
+            message=(
+                f"Sector: {sector.name}\n"
+                f"Risk Score: {risk_score:.1f}\n\n"
+                "Sector entering high-risk zone.\n"
+                f"{ai_data['recommendation']}"
+            ),
+            severity="High",
+            sector=sector.name,
+        )
+
+    else:
+
+        delete_sector_notification(
+            db,
+            "🤖 AI SAFETY ALERT",
+            sector.name,
         )
 
     # ======================================================
     # CCTV INSIGHT
     # ======================================================
 
+    cctv_detected = False
+
     for alert in ai_data["alerts"]:
 
         text = alert["message"].lower()
 
-        if (
-            "smoke" in text
-            or "dense smoke" in text
-            or "fire" in text
-            or "explosion" in text
-            or "gas leak" in text
+        if any(
+            word in text
+            for word in [
+                "dense smoke",
+                "smoke",
+                "fire",
+                "gas leak",
+                "explosion",
+            ]
         ):
 
-            title = "🎥 CCTV INSIGHT"
+            cctv_detected = True
 
-            message = (
-                f"Sector: {sector.name}\n\n"
-                f"{alert['message']}"
-            )
-
-            create_notification(
+            upsert_notification(
                 db=db,
-                title=title,
-                message=message,
+                title="🎥 CCTV INSIGHT",
+                message=(
+                    f"Sector: {sector.name}\n\n"
+                    f"{alert['message']}"
+                ),
                 severity="Critical",
                 sector=sector.name,
             )
 
-            await manager.send_notification(
-                title=title,
-                message=message,
-            )
+            break
 
+    if not cctv_detected:
+
+        delete_sector_notification(
+            db,
+            "🎥 CCTV INSIGHT",
+            sector.name,
+        )
 
 # ==========================================================
 # Live Sensor Data
