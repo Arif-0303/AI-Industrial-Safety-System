@@ -1,5 +1,5 @@
-from typing import Any
 from pydantic import BaseModel
+from typing import Dict, Any
 
 
 class SectorResponse(BaseModel):
@@ -17,8 +17,8 @@ class SectorResponse(BaseModel):
     risk_level: str
     recommendation: str
 
-    # generate_alerts() returns a DICTIONARY
-    alerts: dict[str, Any]
+    # Your generate_alerts() returns a dictionary, not a list
+    alerts: Dict[str, Any]
 
     # Predictive Maintenance
     machine_health: int
@@ -27,7 +27,10 @@ class SectorResponse(BaseModel):
 
     # Incident Prediction
     accident_probability: int
+    incident_type: str
     incident_severity: str
+    incident_confidence: str
+    estimated_time: str
     incident_cause: str
     incident_recommendation: str
 

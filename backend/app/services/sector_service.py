@@ -47,7 +47,7 @@ def get_all_sectors(db: Session):
             "incident_severity": incident["severity"],
             "incident_confidence": incident["confidence"],
             "estimated_time": incident["estimated_time"],
-            "incident_reason": incident["reason"],
+            "incident_cause": incident["reason"],
             "incident_recommendation": incident["recommendation"],
         })
 
