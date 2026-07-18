@@ -1,5 +1,5 @@
+from typing import Any
 from pydantic import BaseModel
-from app.schemas.alert import Alert
 
 
 class SectorResponse(BaseModel):
@@ -12,16 +12,20 @@ class SectorResponse(BaseModel):
     maintenance: str
     risk: str
 
-    # AI Risk Fields
+    # AI Risk
     risk_score: int
     risk_level: str
     recommendation: str
-    alerts: list[Alert]
 
-    # Predictive Maintenance Fields
+    # generate_alerts() returns a DICTIONARY
+    alerts: dict[str, Any]
+
+    # Predictive Maintenance
     machine_health: int
     remaining_life: int
     maintenance_status: str
+
+    # Incident Prediction
     accident_probability: int
     incident_severity: str
     incident_cause: str
