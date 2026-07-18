@@ -9,6 +9,8 @@ from app.ai.recommendation_engine import recommendation
 
 
 def get_all_sectors(db: Session):
+    
+    
 
     sectors = db.query(Sector).all()
 
@@ -20,6 +22,7 @@ def get_all_sectors(db: Session):
         prediction = predictive_maintenance(sector)
         incident = predict_incident(sector)
         response.append({
+           
 
             "id": sector.id,
             "name": sector.name,

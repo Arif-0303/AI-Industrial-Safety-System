@@ -4,6 +4,7 @@ import {
   Factory,
   History,
   MessageSquare,
+  Building2,
 } from "lucide-react";
 
 function Sidebar() {
@@ -12,6 +13,11 @@ function Sidebar() {
       title: "Dashboard",
       path: "/dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      title: "🏭 Sections",
+      path: "/sections",
+      icon: Building2,
     },
     {
       title: "Sector Details",
@@ -32,7 +38,6 @@ function Sidebar() {
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
-
       <div className="p-6 border-b border-slate-800">
         <h1 className="text-xl font-bold text-red-500">
           AI Safety
@@ -44,7 +49,6 @@ function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4">
-
         {menu.map((item) => {
           const Icon = item.icon;
 
@@ -65,9 +69,7 @@ function Sidebar() {
             </NavLink>
           );
         })}
-
       </nav>
-
     </aside>
   );
 }

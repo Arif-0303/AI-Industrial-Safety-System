@@ -1,58 +1,161 @@
+from app.ai.risk_engine import calculate_risk_score
+
+
 def generate_alerts(sector):
 
-    alerts = []
+    risk = calculate_risk_score(sector)
 
-    # Temperature
-    if sector.temperature > 85:
-        alerts.append({
-            "type": "Danger",
-            "message": "Critical temperature detected."
-        })
+    # ==========================================================
+    # AI ALERT
+    # ==========================================================
 
-    elif sector.temperature > 75:
-        alerts.append({
-            "type": "Warning",
-            "message": "High temperature detected."
-        })
+    ai_status = "SAFE"
 
-    # Gas
-    if sector.gas > 70:
-        alerts.append({
-            "type": "Danger",
-            "message": "Gas leakage risk."
-        })
+    cause = "All industrial parameters are operating normally."
 
-    elif sector.gas > 50:
-        alerts.append({
-            "type": "Warning",
-            "message": "Gas level increasing."
-        })
+    risk_description = "No immediate industrial safety risk detected."
 
-    # Pressure
-    if sector.pressure > 10:
-        alerts.append({
-            "type": "Warning",
-            "message": "Pressure above normal."
-        })
+    action = "Continue normal operation."
 
-    # Workers
-    if sector.workers_present > 8:
-        alerts.append({
-            "type": "Info",
-            "message": "High worker density."
-        })
+    findings = []
 
-    # Maintenance
+    # ----------------------------------------------------------
+
+    if sector.temperature >= 90:
+
+        findings.append(
+            f"Temperature reached {sector.temperature}°C."
+        )
+
+    if sector.gas >= 70:
+
+        findings.append(
+            f"Gas concentration reached {sector.gas} ppm."
+        )
+
+    if sector.pressure >= 10:
+
+        findings.append(
+            f"Pressure reached {sector.pressure} bar."
+        )
+
     if sector.maintenance == "Inactive":
-        alerts.append({
-            "type": "Warning",
-            "message": "Maintenance overdue."
-        })
 
-    if len(alerts) == 0:
-        alerts.append({
-            "type": "Safe",
-            "message": "System operating normally."
-        })
+        findings.append(
+            "Maintenance overdue."
+        )
 
-    return alerts
+    if sector.workers_present >= 8:
+
+        findings.append(
+            f"{sector.workers_present} workers currently inside the sector."
+        )
+
+    # ----------------------------------------------------------
+
+    if risk >= 80:
+
+        ai_status = "CRITICAL"
+
+        cause = " | ".join(findings)
+
+        risk_description = (
+            "Multiple hazardous industrial conditions detected. "
+            "Immediate accident or explosion risk exists."
+        )
+
+        action = (
+            f"Evacuate all {sector.workers_present} workers immediately. "
+            "Isolate equipment. Dispatch emergency response team."
+        )
+
+    elif risk >= 60:
+
+        ai_status = "HIGH"
+
+        cause = " | ".join(findings)
+
+        risk_description = (
+            "Sector is approaching critical operating conditions."
+        )
+
+        action = (
+            "Inspect equipment and reduce operational load."
+        )
+
+    # ==========================================================
+    # CCTV INSIGHT (ONLY CRITICAL)
+    # ==========================================================
+
+    cctv_status = "NORMAL"
+
+    vision_findings = []
+
+    # Temporary simulation
+    # Replace later with YOLO/OpenCV output
+
+    if risk >= 80:
+
+        if sector.temperature >= 95:
+
+            cctv_status = "CRITICAL"
+
+            vision_findings.append(
+                "• Dense Smoke Detected"
+            )
+
+        if getattr(sector, "helmet_violation", False):
+
+            cctv_status = "CRITICAL"
+
+            vision_findings.append(
+                "• Worker Without Helmet"
+            )
+
+        if getattr(sector, "vest_violation", False):
+
+            cctv_status = "CRITICAL"
+
+            vision_findings.append(
+                "• Worker Without Safety Vest"
+            )
+
+        if getattr(sector, "restricted_area", False):
+
+            cctv_status = "CRITICAL"
+
+            vision_findings.append(
+                "• Restricted Area Intrusion"
+            )
+
+    if len(vision_findings) == 0:
+
+        vision_findings.append(
+            "No critical visual hazard detected."
+        )
+
+    return {
+
+        "risk_score": risk,
+
+        "ai_alert": {
+
+            "status": ai_status,
+
+            "cause": cause,
+
+            "risk": risk_description,
+
+            "action": action,
+
+        },
+
+        "cctv": {
+
+            "status": cctv_status,
+
+            "message": "\n".join(vision_findings)
+
+        }
+
+    }

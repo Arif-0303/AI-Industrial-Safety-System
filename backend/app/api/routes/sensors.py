@@ -34,21 +34,45 @@ router = APIRouter(
 
 def simulate_sensor_values(sector: Sector):
 
-    sector.temperature = round(
-        max(20, sector.temperature + uniform(-3, 3)),
-        2,
-    )
+    # ===============================
+    # Blast Furnace -> CRITICAL
+    # ===============================
+    if sector.name == "Blast Furnace":
+        sector.temperature = 1250
+        sector.gas = 38
+        sector.pressure = 7.8
+        sector.workers_present = 14
+        sector.maintenance = "Average"
 
-    sector.gas = round(
-        max(0, sector.gas + uniform(-2, 2)),
-        2,
-    )
+    # ===============================
+    # Coke Oven -> WARNING
+    # ===============================
+    elif sector.name == "Coke Oven Battery":
+        sector.temperature = 860
+        sector.gas = 18
+        sector.pressure = 3.5
+        sector.workers_present = 18
+        sector.maintenance = "Average"
 
-    sector.pressure = round(
-        max(1, sector.pressure + uniform(-0.4, 0.4)),
-        2,
-    )
+    # ===============================
+    # Power Plant -> WARNING
+    # ===============================
+    elif sector.name == "Power Plant":
+        sector.temperature = 95
+        sector.gas = 8
+        sector.pressure = 4.2
+        sector.workers_present = 10
+        sector.maintenance = "Good"
 
+    # ===============================
+    # Everything Else -> SAFE
+    # ===============================
+    else:
+        sector.temperature = 35
+        sector.gas = 2
+        sector.pressure = 2
+        sector.workers_present = 8
+        sector.maintenance = "Good"
 
 # ==========================================================
 # Build AI Response
@@ -56,12 +80,17 @@ def simulate_sensor_values(sector: Sector):
 
 def build_ai_response(sector):
 
-    risk_score = calculate_risk_score(sector)
+    # Generate unified AI + CCTV analysis
+    alerts = generate_alerts(sector)
+
+    risk_score = alerts["risk_score"]
 
     # ==========================================
     # Machine Learning Prediction
     # ==========================================
+
     try:
+
         ml_prediction = predict_failure(
             sector=sector.name,
             machine="Conveyor Motor",
@@ -87,6 +116,7 @@ def build_ai_response(sector):
         )
 
     except Exception as e:
+
         print("ML Prediction Error:", e)
 
         ml_prediction = {
@@ -99,27 +129,35 @@ def build_ai_response(sector):
 
     incident = predict_incident(sector)
 
-    alerts = generate_alerts(sector)
-
-    recommendation_text = recommendation(risk_score)
-
     return {
+
         "sector_id": sector.id,
+
         "sector_name": sector.name,
+
         "temperature": sector.temperature,
+
         "gas": sector.gas,
+
         "pressure": sector.pressure,
+
         "workers_present": sector.workers_present,
+
         "maintenance": sector.maintenance,
+
         "risk_score": risk_score,
+
         "ml_prediction": ml_prediction,
-        "recommendation": recommendation_text,
-        "alerts": alerts,
+
         "predictive_maintenance": maintenance,
+
         "incident_prediction": incident,
+
+        # Entire alert object
+        "alerts": alerts,
+
         "timestamp": datetime.utcnow().isoformat(),
     }
-
 
 # ==========================================================
 # Save Reading
@@ -152,38 +190,24 @@ async def store_notifications(
     ai_data,
 ):
 
-    risk_score = ai_data["risk_score"]
+    # ==========================================
+    # AI ALERT
+    # ==========================================
 
-    # ======================================================
-    # AI SAFETY ALERT
-    # ======================================================
+    ai = ai_data["alerts"]["ai_alert"]
 
-    if risk_score >= 75:
+    if ai["status"] == "CRITICAL":
 
         upsert_notification(
             db=db,
             title="🤖 AI SAFETY ALERT",
             message=(
-                f"Sector: {sector.name}\n"
-                f"Risk Score: {risk_score:.1f}\n\n"
-                f"{ai_data['recommendation']}"
+                f"Sector: {sector.name}\n\n"
+                f"{ai['message']}\n\n"
+                f"Recommendation:\n"
+                f"{ai['recommendation']}"
             ),
             severity="Critical",
-            sector=sector.name,
-        )
-
-    elif risk_score >= 60:
-
-        upsert_notification(
-            db=db,
-            title="🤖 AI SAFETY ALERT",
-            message=(
-                f"Sector: {sector.name}\n"
-                f"Risk Score: {risk_score:.1f}\n\n"
-                "Sector entering high-risk zone.\n"
-                f"{ai_data['recommendation']}"
-            ),
-            severity="High",
             sector=sector.name,
         )
 
@@ -195,43 +219,26 @@ async def store_notifications(
             sector.name,
         )
 
-    # ======================================================
+    # ==========================================
     # CCTV INSIGHT
-    # ======================================================
+    # ==========================================
 
-    cctv_detected = False
+    cctv = ai_data["alerts"]["cctv"]
 
-    for alert in ai_data["alerts"]:
+    if cctv["status"] == "CRITICAL":
 
-        text = alert["message"].lower()
+        upsert_notification(
+            db=db,
+            title="🎥 CCTV INSIGHT",
+            message=(
+                f"Sector: {sector.name}\n\n"
+                f"{cctv['message']}"
+            ),
+            severity="Critical",
+            sector=sector.name,
+        )
 
-        if any(
-            word in text
-            for word in [
-                "dense smoke",
-                "smoke",
-                "fire",
-                "gas leak",
-                "explosion",
-            ]
-        ):
-
-            cctv_detected = True
-
-            upsert_notification(
-                db=db,
-                title="🎥 CCTV INSIGHT",
-                message=(
-                    f"Sector: {sector.name}\n\n"
-                    f"{alert['message']}"
-                ),
-                severity="Critical",
-                sector=sector.name,
-            )
-
-            break
-
-    if not cctv_detected:
+    else:
 
         delete_sector_notification(
             db,

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 import asyncio
 
 from app.models.notification import Notification
@@ -7,7 +8,6 @@ from app.websocket.connection_manager import manager
 
 # ==========================================================
 # CREATE OR UPDATE NOTIFICATION
-# One notification per Sector + Type
 # ==========================================================
 
 def upsert_notification(
@@ -17,27 +17,26 @@ def upsert_notification(
     severity: str,
     sector: str,
 ):
-    """
-    Prevent duplicate notifications.
-
-    One CCTV Insight per sector.
-    One AI Safety Alert per sector.
-    """
 
     notification = (
         db.query(Notification)
         .filter(
-            Notification.title == title,
-            Notification.sector == sector,
+            and_(
+                Notification.title == title,
+                Notification.sector == sector,
+            )
         )
         .first()
     )
 
-    # ------------------------------------------
-    # Update Existing Notification
-    # ------------------------------------------
+    # ---------------- UPDATE ----------------
 
     if notification:
+
+        changed = (
+            notification.message != message
+            or notification.severity != severity
+        )
 
         notification.message = message
         notification.severity = severity
@@ -46,27 +45,33 @@ def upsert_notification(
         db.commit()
         db.refresh(notification)
 
-    # ------------------------------------------
-    # Create New Notification
-    # ------------------------------------------
+        # Broadcast ONLY if something actually changed
+        if changed:
+            try:
+                asyncio.create_task(
+                    manager.send_notification(
+                        title=title,
+                        message=message,
+                    )
+                )
+            except RuntimeError:
+                pass
 
-    else:
+        return notification
 
-        notification = Notification(
-            title=title,
-            message=message,
-            severity=severity,
-            sector=sector,
-            is_read=False,
-        )
+    # ---------------- CREATE ----------------
 
-        db.add(notification)
-        db.commit()
-        db.refresh(notification)
+    notification = Notification(
+        title=title,
+        message=message,
+        severity=severity,
+        sector=sector,
+        is_read=False,
+    )
 
-    # ------------------------------------------
-    # Send Live WebSocket Notification
-    # ------------------------------------------
+    db.add(notification)
+    db.commit()
+    db.refresh(notification)
 
     try:
         asyncio.create_task(
@@ -94,19 +99,22 @@ def delete_sector_notification(
     notification = (
         db.query(Notification)
         .filter(
-            Notification.title == title,
-            Notification.sector == sector,
+            and_(
+                Notification.title == title,
+                Notification.sector == sector,
+            )
         )
         .first()
     )
 
     if notification:
+
         db.delete(notification)
         db.commit()
 
 
 # ==========================================================
-# GET ALL
+# GET NOTIFICATIONS
 # ==========================================================
 
 def get_notifications(db: Session):
@@ -133,12 +141,13 @@ def mark_as_read(
         .first()
     )
 
-    if notification:
+    if notification is None:
+        return None
 
-        notification.is_read = True
+    notification.is_read = True
 
-        db.commit()
-        db.refresh(notification)
+    db.commit()
+    db.refresh(notification)
 
     return notification
 
@@ -158,10 +167,11 @@ def delete_notification(
         .first()
     )
 
-    if notification:
+    if notification is None:
+        return None
 
-        db.delete(notification)
-        db.commit()
+    db.delete(notification)
+    db.commit()
 
     return notification
 

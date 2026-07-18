@@ -1,34 +1,48 @@
 def calculate_risk_score(sector):
     score = 0
 
+    # ===========================
     # Temperature
-    if sector.temperature > 80:
-        score += 30
-    elif sector.temperature > 70:
+    # ===========================
+    if sector.temperature >= 1500:
+        score += 45
+    elif sector.temperature >= 1200:
+        score += 35
+    elif sector.temperature >= 900:
         score += 20
-    elif sector.temperature > 60:
+    elif sector.temperature >= 100:
         score += 10
 
+    # ===========================
     # Gas
-    if sector.gas > 70:
-        score += 30
-    elif sector.gas > 50:
+    # ===========================
+    if sector.gas >= 35:
+        score += 35
+    elif sector.gas >= 20:
         score += 20
-    elif sector.gas > 30:
+    elif sector.gas >= 10:
         score += 10
 
+    # ===========================
     # Pressure
-    if sector.pressure > 10:
+    # ===========================
+    if sector.pressure >= 8:
         score += 20
-    elif sector.pressure > 8:
+    elif sector.pressure >= 5:
         score += 10
 
+    # ===========================
     # Workers
-    if sector.workers_present > 8:
-        score += 10
+    # ===========================
+    if sector.workers_present >= 20:
+        score += 5
 
+    # ===========================
     # Maintenance
+    # ===========================
     if sector.maintenance == "Inactive":
+        score += 20
+    elif sector.maintenance == "Average":
         score += 10
 
     return min(score, 100)

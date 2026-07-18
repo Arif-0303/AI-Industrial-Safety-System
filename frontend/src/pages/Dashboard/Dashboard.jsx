@@ -6,22 +6,31 @@ import PlantHealthCard from "../../components/stats/PlantHealthCard";
 import ActiveAlertCard from "../../components/stats/ActiveAlertCard";
 import WorkerCard from "../../components/stats/WorkerCard";
 import RiskScoreCard from "../../components/stats/RiskScoreCard";
-
+import IncidentPredictionCard from "../../components/stats/IncidentPredictionCard";
+import EmergencyPopup from "../../components/dashboard/EmergencyPopup";
 import TemperatureChart from "../../components/charts/TemperatureChart";
-
+import EmergencyOverlay from "../../components/dashboard/EmergencyOverlay";
 import MainLayout from "../../layouts/MainLayout";
 import LiveAlerts from "../../components/dashboard/LiveAlerts";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import SectionTitle from "../../components/dashboard/SectionTitle";
-import PlantStatus from "../../components/dashboard/PlantStatus";
 import PlantOverview from "../../components/dashboard/PlantOverview";
 import SectorGrid from "../../components/dashboard/SectorGrid";
+import DigitalTwin from "../../components/dashboard/DigitalTwin";
+import ActionLog from "../../components/dashboard/ActionLog";
+import CommandCenter from "../../components/dashboard/CommandCenter";
+import StartMonitoring from "../../components/dashboard/StartMonitoring";
 
 function Dashboard() {
   const [sectors, setSectors] = useState([]);
   const [wsStatus, setWsStatus] = useState("Disconnected");
   const [lastMessage, setLastMessage] = useState(null);
   const [toast, setToast] = useState(null);
+  const [emergency, setEmergency] = useState(null);
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [actionLogs, setActionLogs] = useState([]);
+  const [systemStarted, setSystemStarted] = useState(false);
+
   // Initial API Load
   const loadSectors = async () => {
     try {
@@ -32,15 +41,21 @@ function Dashboard() {
     }
   };
 
+  const addActionLog = (log) => {
+    setActionLogs((prev) => [log, ...prev]);
+  };
+
   useEffect(() => {
     // Load initial data once
     loadSectors();
 
     // Connect WebSocket
     websocketService.connect();
+
     websocketService.onNotification((notification) => {
-  setToast(notification);
-  });
+      setToast(notification);
+    });
+
     setWsStatus("Connected");
 
     // Listen for Live Updates
@@ -49,7 +64,7 @@ function Dashboard() {
 
       setLastMessage(message);
 
-      // Update Dashboard automatically
+      // Full sensor update
       if (
         message.type === "sensor_update" &&
         Array.isArray(message.data)
@@ -69,9 +84,25 @@ function Dashboard() {
             alerts: item.alerts,
             predictive_maintenance: item.predictive_maintenance,
             incident_prediction: item.incident_prediction,
-      }))
-    );
- }
+          }))
+        );
+
+        // Find highest priority emergency
+        const criticalSector = [...message.data]
+          .filter(
+            (sector) =>
+              sector.risk_score >= 80 &&
+              sector.workers_present > 0
+          )
+          .sort((a, b) => b.risk_score - a.risk_score)[0];
+
+        if (criticalSector) {
+          setEmergency(criticalSector);
+        } else {
+          setEmergency(null);
+          setEmergencyMode(false);
+        }
+      }
 
       // Single sector update
       if (
@@ -102,10 +133,22 @@ function Dashboard() {
     };
   }, []);
 
+  // ============================
+  // Start Monitoring Screen
+  // ============================
+  if (!systemStarted) {
+    return (
+      <StartMonitoring
+        onStart={() => {
+          setSystemStarted(true);
+        }}
+      />
+    );
+  }
+
   return (
     <MainLayout>
       <DashboardLayout>
-
         <SectionTitle
           title="Industrial Safety Dashboard"
           subtitle="Real-Time Monitoring & AI Risk Assessment"
@@ -127,13 +170,13 @@ function Dashboard() {
           </div>
         </div>
 
-      
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        {/* Dashboard Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
           <PlantHealthCard sectors={sectors} />
           <ActiveAlertCard sectors={sectors} />
           <WorkerCard sectors={sectors} />
           <RiskScoreCard sectors={sectors} />
+          <IncidentPredictionCard sectors={sectors} />
         </div>
 
         <PlantOverview sectors={sectors} />
@@ -156,23 +199,42 @@ function Dashboard() {
           </div>
         )}
 
-        <div>
-          <h2 className="text-2xl font-bold mb-6">
-            Production Sectors
-          </h2>
-
-          <SectorGrid sectors={sectors} />
-        </div>
-
+        <DigitalTwin sectors={sectors} />
       </DashboardLayout>
-    {toast && (
-  <div className="fixed top-5 right-5 z-50">
-    <NotificationToast
-      notification={toast}
-      onClose={() => setToast(null)}
-    />
-  </div>
-)}
+
+      {toast && (
+        <div className="fixed top-5 right-5 z-50">
+          <NotificationToast
+            notification={toast}
+            onClose={() => setToast(null)}
+          />
+        </div>
+      )}
+
+      <EmergencyPopup
+        emergency={emergency}
+        onBroadcast={() => {
+          console.log("Emergency Broadcast Started");
+          setEmergencyMode(true);
+        }}
+        onClose={() => {
+          setEmergency(null);
+          setEmergencyMode(false);
+          setActionLogs([]);
+        }}
+      />
+
+      <CommandCenter
+        emergency={emergency}
+        onLog={addActionLog}
+      />
+
+      <ActionLog logs={actionLogs} />
+
+      <EmergencyOverlay
+        open={emergencyMode}
+        emergency={emergency}
+      />
     </MainLayout>
   );
 }
