@@ -8,15 +8,24 @@ function PlantOverview({ sectors }) {
     0
   );
 
-  const criticalAlerts = sectors.reduce(
-    (sum, sector) =>
-      sum +
-      sector.alerts.filter((alert) => alert.type === "Danger").length,
-    0
-  );
+  // Count critical alerts from the new backend format
+  const criticalAlerts = sectors.reduce((sum, sector) => {
+    let count = 0;
+
+    if (sector.alerts?.ai_alert?.status === "CRITICAL") {
+      count++;
+    }
+
+    if (sector.alerts?.cctv?.status === "CRITICAL") {
+      count++;
+    }
+
+    return sum + count;
+  }, 0);
 
   const maintenance = sectors.filter(
-    (sector) => sector.maintenance === "Inactive"
+    (sector) =>
+      sector.maintenance?.toLowerCase() === "inactive"
   ).length;
 
   return (

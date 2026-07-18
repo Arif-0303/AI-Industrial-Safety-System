@@ -1,14 +1,16 @@
 function ActiveAlertCard({ sectors }) {
-
   let alerts = 0;
 
   sectors.forEach((sector) => {
-    alerts += sector.alerts.length;
+    if (!sector.alerts) return;
+
+    // New backend format
+    if (sector.alerts.ai_alert?.status === "CRITICAL") alerts++;
+    if (sector.alerts.cctv?.status === "CRITICAL") alerts++;
   });
 
   return (
     <div className="bg-slate-800 rounded-xl p-5 shadow-lg">
-
       <h3 className="text-gray-400 text-sm">
         Active Alerts
       </h3>
@@ -20,7 +22,6 @@ function ActiveAlertCard({ sectors }) {
       <p className="text-sm text-gray-500 mt-2">
         Current Alerts
       </p>
-
     </div>
   );
 }
