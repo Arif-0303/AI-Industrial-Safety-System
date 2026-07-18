@@ -41,7 +41,7 @@ def get_all_sectors(db: Session):
             "machine_health": prediction["machine_health"],
             "remaining_life": prediction["remaining_life"],
             "maintenance_status": prediction["maintenance_status"],
-            "accident_probability": incident["accident_probability"],
+            "accident_probability": incident["probability"],
             "incident_severity": incident["severity"],
             "incident_cause": incident["cause"],
             "incident_recommendation": incident["recommendation"],
