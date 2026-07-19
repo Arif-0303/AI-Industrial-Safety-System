@@ -1,13 +1,14 @@
+import StatusCard from "../cards/StatusCard";
+
 function AIRiskPanel({ sectors }) {
   if (!sectors || sectors.length === 0) return null;
 
   const highRisk = sectors.filter(
-    (sector) => sector.risk === "High"
+    (sector) => sector.risk_score >= 80
   );
 
   return (
     <div className="bg-slate-800 rounded-xl p-6 mt-8">
-
       <h2 className="text-2xl font-bold mb-5">
         AI Risk Analysis
       </h2>
@@ -27,31 +28,52 @@ function AIRiskPanel({ sectors }) {
             </h3>
 
             <p className="mt-2">
-              Risk Score :
+              Risk Score:
               <span className="text-yellow-400 ml-2">
                 {sector.risk_score}
               </span>
             </p>
 
             <p className="mt-2">
-              Recommendation :
+              Recommendation:
               <span className="text-green-400 ml-2">
                 {sector.recommendation}
               </span>
             </p>
 
-            <div className="mt-3">
-              {sector.alerts.map((alert, index) => (
-                <div key={index}>
-                  • {alert.message}
-                </div>
-              ))}
-            </div>
+            {sector.alerts?.ai_alert && (
+              <div className="mt-4">
+                <p>
+                  <strong>Status:</strong>{" "}
+                  {sector.alerts.ai_alert.status}
+                </p>
 
+                <p>
+                  <strong>Cause:</strong>{" "}
+                  {sector.alerts.ai_alert.cause}
+                </p>
+
+                <p>
+                  <strong>Risk:</strong>{" "}
+                  {sector.alerts.ai_alert.risk}
+                </p>
+
+                <p>
+                  <strong>Action:</strong>{" "}
+                  {sector.alerts.ai_alert.action}
+                </p>
+              </div>
+            )}
+
+            {sector.alerts?.cctv && (
+              <div className="mt-3 text-red-300">
+                <strong>CCTV:</strong>{" "}
+                {sector.alerts.cctv.message}
+              </div>
+            )}
           </div>
         ))
       )}
-
     </div>
   );
 }

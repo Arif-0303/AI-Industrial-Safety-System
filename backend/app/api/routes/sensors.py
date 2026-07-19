@@ -32,48 +32,87 @@ router = APIRouter(
 # Simulate Live Sensor Values
 # ==========================================================
 
+from random import uniform, randint, choice
+
 def simulate_sensor_values(sector: Sector):
 
     # ===============================
-    # Blast Furnace -> CRITICAL
+    # Blast Furnace (Mostly Critical)
     # ===============================
     if sector.name == "Blast Furnace":
-        sector.temperature = 1250
-        sector.gas = 38
-        sector.pressure = 7.8
-        sector.workers_present = 14
-        sector.maintenance = "Average"
+
+        sector.temperature = round(uniform(1100, 1350), 1)
+        sector.gas = round(uniform(28, 50), 1)
+        sector.pressure = round(uniform(6.5, 9.5), 1)
+        sector.workers_present = randint(10, 18)
+        sector.maintenance = choice(
+            ["Average", "Poor", "Inactive"]
+        )
 
     # ===============================
-    # Coke Oven -> WARNING
+    # Coke Oven Battery (Warning/Critical)
     # ===============================
     elif sector.name == "Coke Oven Battery":
-        sector.temperature = 860
-        sector.gas = 18
-        sector.pressure = 3.5
-        sector.workers_present = 18
-        sector.maintenance = "Average"
+
+        sector.temperature = round(uniform(750, 980), 1)
+        sector.gas = round(uniform(12, 30), 1)
+        sector.pressure = round(uniform(2.5, 5.0), 1)
+        sector.workers_present = randint(12, 20)
+        sector.maintenance = choice(
+            ["Good", "Average"]
+        )
 
     # ===============================
-    # Power Plant -> WARNING
+    # Power Plant
     # ===============================
     elif sector.name == "Power Plant":
-        sector.temperature = 95
-        sector.gas = 8
-        sector.pressure = 4.2
-        sector.workers_present = 10
-        sector.maintenance = "Good"
+
+        sector.temperature = round(uniform(70, 110), 1)
+        sector.gas = round(uniform(4, 10), 1)
+        sector.pressure = round(uniform(3, 5), 1)
+        sector.workers_present = randint(8, 14)
+        sector.maintenance = choice(
+            ["Good", "Average"]
+        )
 
     # ===============================
-    # Everything Else -> SAFE
+    # Basic Oxygen Furnace
+    # ===============================
+    elif sector.name == "Basic Oxygen Furnace":
+
+        sector.temperature = round(uniform(1400, 1650), 1)
+        sector.gas = round(uniform(8, 18), 1)
+        sector.pressure = round(uniform(3, 5), 1)
+        sector.workers_present = randint(10, 18)
+        sector.maintenance = choice(
+            ["Good", "Average"]
+        )
+
+    # ===============================
+    # Rolling Mill
+    # ===============================
+    elif sector.name == "Rolling Mill":
+
+        sector.temperature = round(uniform(350, 550), 1)
+        sector.gas = round(uniform(1, 4), 1)
+        sector.pressure = round(uniform(1, 3), 1)
+        sector.workers_present = randint(15, 25)
+        sector.maintenance = choice(
+            ["Excellent", "Good"]
+        )
+
+    # ===============================
+    # Remaining Plants
     # ===============================
     else:
-        sector.temperature = 35
-        sector.gas = 2
-        sector.pressure = 2
-        sector.workers_present = 8
-        sector.maintenance = "Good"
 
+        sector.temperature = round(uniform(25, 45), 1)
+        sector.gas = round(uniform(0.2, 4), 1)
+        sector.pressure = round(uniform(1, 3), 1)
+        sector.workers_present = randint(5, 12)
+        sector.maintenance = choice(
+            ["Excellent", "Good"]
+        )
 # ==========================================================
 # Build AI Response
 # ==========================================================

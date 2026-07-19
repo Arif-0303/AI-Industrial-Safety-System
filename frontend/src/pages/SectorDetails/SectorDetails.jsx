@@ -76,17 +76,58 @@ function SectorDetails() {
       <div className="bg-slate-800 mt-8 p-6 rounded-xl">
 
         <h2 className="text-xl mb-4">
-          Alerts
+          AI Alerts
         </h2>
 
-        {sector.alerts.map((alert, index) => (
-          <div
-            key={index}
-            className="border-b border-slate-700 py-2"
-          >
-            <strong>{alert.type}</strong> : {alert.message}
+        {sector.alerts ? (
+          <div className="space-y-4">
+
+            <div className="bg-slate-700 p-4 rounded-lg">
+              <h3 className="font-bold text-red-400">
+                AI Alert
+              </h3>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {sector.alerts.ai_alert?.status}
+              </p>
+
+              <p>
+                <strong>Cause:</strong>{" "}
+                {sector.alerts.ai_alert?.cause}
+              </p>
+
+              <p>
+                <strong>Risk:</strong>{" "}
+                {sector.alerts.ai_alert?.risk}
+              </p>
+
+              <p>
+                <strong>Action:</strong>{" "}
+                {sector.alerts.ai_alert?.action}
+              </p>
+            </div>
+
+            <div className="bg-slate-700 p-4 rounded-lg">
+              <h3 className="font-bold text-yellow-400">
+                CCTV Analysis
+              </h3>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {sector.alerts.cctv?.status}
+              </p>
+
+              <p>
+                <strong>Message:</strong>{" "}
+                {sector.alerts.cctv?.message}
+              </p>
+            </div>
+
           </div>
-        ))}
+        ) : (
+          <p>No alerts available.</p>
+        )}
 
       </div>
 

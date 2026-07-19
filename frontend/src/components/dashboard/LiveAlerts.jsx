@@ -1,15 +1,26 @@
 import React from "react";
 
-function LiveAlerts({ sectors }) {
+function LiveAlerts({ sectors = [] }) {
   const alerts = [];
 
   sectors.forEach((sector) => {
-    if (sector.alerts && Array.isArray(sector.alerts)) {
-      sector.alerts.forEach((alert) => {
-        alerts.push({
-          sector: sector.sector_name || sector.name,
-          ...alert,
-        });
+    if (!sector.alerts) return;
+
+    // AI Alert
+    if (sector.alerts.ai_alert) {
+      alerts.push({
+        sector: sector.name,
+        type: sector.alerts.ai_alert.status,
+        message: sector.alerts.ai_alert.cause,
+      });
+    }
+
+    // CCTV Alert
+    if (sector.alerts.cctv) {
+      alerts.push({
+        sector: sector.name,
+        type: sector.alerts.cctv.status,
+        message: sector.alerts.cctv.message,
       });
     }
   });
@@ -30,11 +41,12 @@ function LiveAlerts({ sectors }) {
             <div
               key={index}
               className={`rounded-xl border-l-4 p-4 shadow ${
-                alert.type === "Danger"
+                alert.type === "CRITICAL"
                   ? "border-red-600 bg-red-100"
-                  : alert.type === "Warning"
+                  : alert.type === "WARNING"
                   ? "border-yellow-500 bg-yellow-100"
-                  : alert.type === "Safe"
+                  : alert.type === "SAFE" ||
+                    alert.type === "NORMAL"
                   ? "border-green-500 bg-green-100"
                   : "border-blue-500 bg-blue-100"
               }`}
@@ -48,7 +60,9 @@ function LiveAlerts({ sectors }) {
               </p>
 
               <p className="mt-2 text-sm text-gray-700">
-                <span className="font-semibold">Sector:</span>{" "}
+                <span className="font-semibold">
+                  Sector:
+                </span>{" "}
                 {alert.sector}
               </p>
             </div>
