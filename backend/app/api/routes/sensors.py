@@ -228,26 +228,28 @@ async def store_notifications(
     sector: Sector,
     ai_data,
 ):
-
-    # ==========================================
-    # AI ALERT
-    # ==========================================
-
     ai = ai_data["alerts"]["ai_alert"]
+    cctv = ai_data["alerts"]["cctv"]
 
-    if ai["status"] == "CRITICAL":
+    # Trigger notification based on risk score
+    if ai_data["risk_score"] >= 80:
 
         upsert_notification(
             db=db,
             title="🤖 AI SAFETY ALERT",
             message=(
                 f"Sector: {sector.name}\n\n"
-                f"{ai['message']}\n\n"
-                f"Recommendation:\n"
-                f"{ai['recommendation']}"
+                f"Risk Score: {ai_data['risk_score']}\n\n"
+                f"Cause:\n{ai['cause']}\n\n"
+                f"Action:\n{ai['action']}"
             ),
             severity="Critical",
             sector=sector.name,
+        )
+
+        await manager.send_notification(
+            title="🤖 AI SAFETY ALERT",
+            message=f"{sector.name} is in CRITICAL condition.",
         )
 
     else:
@@ -258,23 +260,20 @@ async def store_notifications(
             sector.name,
         )
 
-    # ==========================================
-    # CCTV INSIGHT
-    # ==========================================
-
-    cctv = ai_data["alerts"]["cctv"]
-
+    # CCTV Notification
     if cctv["status"] == "CRITICAL":
 
         upsert_notification(
             db=db,
             title="🎥 CCTV INSIGHT",
-            message=(
-                f"Sector: {sector.name}\n\n"
-                f"{cctv['message']}"
-            ),
+            message=f"{sector.name}\n\n{cctv['message']}",
             severity="Critical",
             sector=sector.name,
+        )
+
+        await manager.send_notification(
+            title="🎥 CCTV INSIGHT",
+            message=f"{sector.name}: {cctv['message']}",
         )
 
     else:
