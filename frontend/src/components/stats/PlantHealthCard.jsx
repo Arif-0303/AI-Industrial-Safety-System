@@ -1,6 +1,6 @@
 function PlantHealthCard({ sectors }) {
   const healthy = sectors.filter(
-    (sector) => sector.risk_level === "Safe"
+    (sector) => sector.risk_score < 60
   ).length;
 
   return (
