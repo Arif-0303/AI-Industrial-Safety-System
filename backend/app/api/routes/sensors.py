@@ -37,82 +37,70 @@ from random import uniform, randint, choice
 def simulate_sensor_values(sector: Sector):
 
     # ===============================
-    # Blast Furnace (Mostly Critical)
+    # Blast Furnace (WARNING)
     # ===============================
     if sector.name == "Blast Furnace":
 
-        sector.temperature = round(uniform(1100, 1350), 1)
-        sector.gas = round(uniform(28, 50), 1)
-        sector.pressure = round(uniform(6.5, 9.5), 1)
-        sector.workers_present = randint(10, 18)
-        sector.maintenance = choice(
-            ["Average", "Poor", "Inactive"]
-        )
+        sector.temperature = round(uniform(900, 1100), 1)
+        sector.gas = round(uniform(18, 28), 1)
+        sector.pressure = round(uniform(4.0, 5.5), 1)
+        sector.workers_present = randint(10, 16)
+        sector.maintenance = choice(["Good", "Average"])
 
     # ===============================
-    # Coke Oven Battery (Warning/Critical)
+    # Coke Oven Battery (WARNING)
     # ===============================
     elif sector.name == "Coke Oven Battery":
 
-        sector.temperature = round(uniform(750, 980), 1)
-        sector.gas = round(uniform(12, 30), 1)
-        sector.pressure = round(uniform(2.5, 5.0), 1)
-        sector.workers_present = randint(12, 20)
-        sector.maintenance = choice(
-            ["Good", "Average"]
-        )
+        sector.temperature = round(uniform(700, 850), 1)
+        sector.gas = round(uniform(10, 18), 1)
+        sector.pressure = round(uniform(2.5, 4.5), 1)
+        sector.workers_present = randint(10, 18)
+        sector.maintenance = choice(["Good", "Average"])
 
     # ===============================
-    # Power Plant
+    # Power Plant (SAFE)
     # ===============================
     elif sector.name == "Power Plant":
 
-        sector.temperature = round(uniform(70, 110), 1)
-        sector.gas = round(uniform(4, 10), 1)
-        sector.pressure = round(uniform(3, 5), 1)
-        sector.workers_present = randint(8, 14)
-        sector.maintenance = choice(
-            ["Good", "Average"]
-        )
+        sector.temperature = round(uniform(60, 90), 1)
+        sector.gas = round(uniform(2, 6), 1)
+        sector.pressure = round(uniform(2, 4), 1)
+        sector.workers_present = randint(8, 12)
+        sector.maintenance = "Good"
 
     # ===============================
-    # Basic Oxygen Furnace
+    # Basic Oxygen Furnace (WARNING)
     # ===============================
     elif sector.name == "Basic Oxygen Furnace":
 
-        sector.temperature = round(uniform(1400, 1650), 1)
-        sector.gas = round(uniform(8, 18), 1)
+        sector.temperature = round(uniform(1000, 1200), 1)
+        sector.gas = round(uniform(8, 15), 1)
         sector.pressure = round(uniform(3, 5), 1)
-        sector.workers_present = randint(10, 18)
-        sector.maintenance = choice(
-            ["Good", "Average"]
-        )
+        sector.workers_present = randint(10, 16)
+        sector.maintenance = "Good"
 
     # ===============================
-    # Rolling Mill
+    # Rolling Mill (SAFE)
     # ===============================
     elif sector.name == "Rolling Mill":
 
-        sector.temperature = round(uniform(350, 550), 1)
-        sector.gas = round(uniform(1, 4), 1)
+        sector.temperature = round(uniform(300, 450), 1)
+        sector.gas = round(uniform(1, 3), 1)
         sector.pressure = round(uniform(1, 3), 1)
-        sector.workers_present = randint(15, 25)
-        sector.maintenance = choice(
-            ["Excellent", "Good"]
-        )
+        sector.workers_present = randint(12, 20)
+        sector.maintenance = "Excellent"
 
     # ===============================
-    # Remaining Plants
+    # Remaining Plants (SAFE)
     # ===============================
     else:
 
         sector.temperature = round(uniform(25, 45), 1)
-        sector.gas = round(uniform(0.2, 4), 1)
+        sector.gas = round(uniform(0.2, 3), 1)
         sector.pressure = round(uniform(1, 3), 1)
-        sector.workers_present = randint(5, 12)
-        sector.maintenance = choice(
-            ["Excellent", "Good"]
-        )
+        sector.workers_present = randint(5, 10)
+        sector.maintenance = "Excellent"
 # ==========================================================
 # Build AI Response
 # ==========================================================
