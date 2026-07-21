@@ -61,7 +61,7 @@ export default function StartMonitoring({ onStart }) {
                 </h1>
 
                 <h2>
-                    Adobe Hackathon 2026
+                    Economic Times Hackathon 2026
                 </h2>
 
                 <br />
