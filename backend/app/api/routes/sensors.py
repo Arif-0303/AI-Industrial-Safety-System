@@ -28,66 +28,62 @@ router = APIRouter(
 )
 
 
-# ==========================================================
-# Simulate Live Sensor Values
-# ==========================================================
-
 from random import uniform, randint, choice
 
 def simulate_sensor_values(sector: Sector):
 
     # ===============================
-    # Blast Furnace (WARNING)
+    # Blast Furnace (CRITICAL)
     # ===============================
     if sector.name == "Blast Furnace":
 
-        sector.temperature = round(uniform(900, 1100), 1)
-        sector.gas = round(uniform(18, 28), 1)
-        sector.pressure = round(uniform(4.0, 5.5), 1)
-        sector.workers_present = randint(10, 16)
-        sector.maintenance = choice(["Good", "Average"])
+        sector.temperature = round(uniform(1220, 1320), 1)
+        sector.gas = round(uniform(36, 45), 1)
+        sector.pressure = round(uniform(8.2, 9.2), 1)
+        sector.workers_present = randint(12, 18)
+        sector.maintenance = "Inactive"
 
     # ===============================
     # Coke Oven Battery (WARNING)
     # ===============================
     elif sector.name == "Coke Oven Battery":
 
-        sector.temperature = round(uniform(700, 850), 1)
-        sector.gas = round(uniform(10, 18), 1)
-        sector.pressure = round(uniform(2.5, 4.5), 1)
-        sector.workers_present = randint(10, 18)
-        sector.maintenance = choice(["Good", "Average"])
-
-    # ===============================
-    # Power Plant (SAFE)
-    # ===============================
-    elif sector.name == "Power Plant":
-
-        sector.temperature = round(uniform(60, 90), 1)
-        sector.gas = round(uniform(2, 6), 1)
-        sector.pressure = round(uniform(2, 4), 1)
-        sector.workers_present = randint(8, 12)
-        sector.maintenance = "Good"
+        sector.temperature = round(uniform(920, 980), 1)
+        sector.gas = round(uniform(14, 18), 1)
+        sector.pressure = round(uniform(3.5, 4.5), 1)
+        sector.workers_present = randint(12, 18)
+        sector.maintenance = "Average"
 
     # ===============================
     # Basic Oxygen Furnace (WARNING)
     # ===============================
     elif sector.name == "Basic Oxygen Furnace":
 
-        sector.temperature = round(uniform(1000, 1200), 1)
-        sector.gas = round(uniform(8, 15), 1)
-        sector.pressure = round(uniform(3, 5), 1)
+        sector.temperature = round(uniform(950, 1050), 1)
+        sector.gas = round(uniform(12, 18), 1)
+        sector.pressure = round(uniform(3.5, 4.8), 1)
         sector.workers_present = randint(10, 16)
-        sector.maintenance = "Good"
+        sector.maintenance = "Average"
+
+    # ===============================
+    # Power Plant (WARNING)
+    # ===============================
+    elif sector.name == "Power Plant":
+
+        sector.temperature = round(uniform(95, 105), 1)
+        sector.gas = round(uniform(8, 10), 1)
+        sector.pressure = round(uniform(4.2, 4.8), 1)
+        sector.workers_present = randint(8, 12)
+        sector.maintenance = "Average"
 
     # ===============================
     # Rolling Mill (SAFE)
     # ===============================
     elif sector.name == "Rolling Mill":
 
-        sector.temperature = round(uniform(300, 450), 1)
-        sector.gas = round(uniform(1, 3), 1)
-        sector.pressure = round(uniform(1, 3), 1)
+        sector.temperature = round(uniform(300, 380), 1)
+        sector.gas = round(uniform(1, 2), 1)
+        sector.pressure = round(uniform(1.2, 2.2), 1)
         sector.workers_present = randint(12, 20)
         sector.maintenance = "Excellent"
 
@@ -96,9 +92,9 @@ def simulate_sensor_values(sector: Sector):
     # ===============================
     else:
 
-        sector.temperature = round(uniform(25, 45), 1)
-        sector.gas = round(uniform(0.2, 3), 1)
-        sector.pressure = round(uniform(1, 3), 1)
+        sector.temperature = round(uniform(25, 50), 1)
+        sector.gas = round(uniform(0.2, 2.5), 1)
+        sector.pressure = round(uniform(1.0, 2.5), 1)
         sector.workers_present = randint(5, 10)
         sector.maintenance = "Excellent"
 # ==========================================================
